@@ -1,0 +1,203 @@
+/* Feature tiles: Postgraduate / Undergraduate / International */
+.squ-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 3rem;
+}
+.squ-tile {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 220px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+.squ-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.05) 60%);
+}
+.squ-tile span {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1.25rem;
+}
+
+/* Stat counter row */
+.squ-stats {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  padding: 3rem 1rem;
+  text-align: center;
+  flex-wrap: wrap;
+}
+.squ-stat__number {
+  color: var(--squ-gold, #c9922a);
+  font-size: 2.5rem;
+  font-weight: 700;
+  border-bottom: 2px solid var(--squ-gold, #c9922a);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.squ-stat__label {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+/* Research highlight */
+.squ-research {
+  padding: 3rem;
+  background: #f2f3f5;
+}
+.squ-research__heading {
+  color: #1b3a63;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+.squ-research__cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+.squ-research__card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 260px;
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+}
+.squ-research__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 65%);
+}
+.squ-research__card-title {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+}
+
+/* We Are SQU block */
+.squ-we-are {
+  position: relative;
+  min-height: 420px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+}
+.squ-we-are__card {
+  position: relative;
+  z-index: 1;
+  background: rgba(20, 22, 26, 0.88);
+  color: #fff;
+  padding: 2.5rem;
+  max-width: 420px;
+  margin-left: 3rem;
+}
+.squ-we-are__heading {
+  color: #c9922a;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.squ-we-are__buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.squ-we-are__buttons a {
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 0.6rem 1.25rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Student life gallery */
+.squ-gallery {
+  padding: 3rem;
+}
+.squ-gallery__heading {
+  color: #1b3a63;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+.squ-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+.squ-gallery__tile {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 180px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+  font-weight: 700;
+  padding: 1rem;
+}
+.squ-gallery__tile.is-large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.squ-gallery__tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 55%);
+}
+.squ-gallery__tile span {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .squ-tiles, .squ-research__cards { grid-template-columns: 1fr; }
+  .squ-gallery__grid { grid-template-columns: repeat(2, 1fr); }
+  .squ-stats { gap: 2rem; }
+}
+
+/* Drupal's default field renderer wraps every field in its own div with a
+   visible label - hide the labels and make any <img> fill its container,
+   since these templates print {{ content.field_x }} directly rather than
+   manually extracting file URLs (faster and less fragile to build). */
+.squ-hero__bg, .squ-tile__bg, .squ-research__card-bg,
+.squ-we-are__bg, .squ-gallery__tile-bg {
+  position: absolute;
+  inset: 0;
+}
+.squ-hero__bg img, .squ-tile__bg img, .squ-research__card-bg img,
+.squ-we-are__bg img, .squ-gallery__tile-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.squ-hero, .squ-tile, .squ-research__card, .squ-we-are, .squ-gallery__tile {
+  position: relative;
+  overflow: hidden;
+}
+.field__label {
+  display: none;
+}

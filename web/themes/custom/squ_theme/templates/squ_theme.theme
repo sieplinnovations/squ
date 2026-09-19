@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * @file
+ * SQU theme hooks: the global footer.
+ *
+ * The footer is added to the page_bottom of html.html.twig, so it does NOT
+ * depend on Olivero's page template, on block regions, or on placing blocks.
+ *
+ * EVERYTHING in it is managed from the Drupal admin (Structure > Menus):
+ *   footer-icons        : the round icon buttons under the logo
+ *                         (link title = tooltip/label; optional icon choice, see below)
+ *   footer-quick-links  : the "Quick LINKS" grid (top-level links, in menu order)
+ *   footer-legal        : Privacy Statement | Terms & Conditions | Accessibility
+ * Copyright text = current year + Site name (Configuration > Basic site information).
+ * Add / remove / reorder / disable / translate links there and the footer updates.
+ *
+ * Choosing an icon for a footer-icons link: type  icon:video  (or globe, user,
+ * support, link)  in the link's Description field. If the Description is empty,
+ * the icon is guessed from the link title (Videos, International, Portal login,
+ * Support ...); anything else gets a generic link icon.
+ */
+
+use Drupal\Core\Menu\MenuTreeParameters;
+
+/**
+ * Implements hook_theme().
+ */
+function squ_theme_theme($existing, $type, $theme, $path) {
+  return [
+    'squ_footer' => [
+      'variables' => [
+        'home_url' => '/',
+        'logo_url' => '',
+        'site_name' => '',
+        'icons' => [],
+        'quick_links' => [],
+        'legal_links' => [],
+        'copyright' => '',
+      ],
+      'template' => 'squ-footer',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function squ_theme_preprocess_html(array &$variables) {
+  $theme_path = \Drupal::service('extension.path.resolver')->getPath('theme', 'squ_theme');
+  $year = \Drupal::service('date.formatter')->format(\Drupal::time()->getRequestTime(), 'custom', 'Y');
+  $site_name = (string) \Drupal::config('system.site')->get('name');
+
+  $variables['page_bottom']['squ_footer'] = [
+    '#theme' => 'squ_footer',
+    '#home_url' => \Drupal\Core\Url::fromRoute('<front>')->toString(),
+    '#logo_url' => \Drupal\Core\Url::fromUri('base:' . $theme_path . '/images/squ-footer-logo.png')->toString(),
+    '#site_name' => $site_name,
+    '#icons' => _squ_theme_footer_menu('footer-icons', TRUE),
+    '#quick_links' => _squ_theme_footer_menu('footer-quick-links'),
+    '#legal_links' => _squ_theme_footer_menu('footer-legal'),
+    '#copyright' => t('@year @name. All Rights Reserved.', ['@year' => $year, '@name' => $site_name]),
+    '#cache' => [
+      'contexts' => ['languages:language_interface', 'user.permissions'],
+      'tags' => [
+        'config:system.menu.footer-icons',
+        'config:system.menu.footer-quick-links',
+        'config:system.menu.footer-legal',
+        'config:system.site',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Loads the enabled top-level links of a menu, in menu order.
+ *
+ * @return array
+ *   Each item: ['title' => string, 'url' => string, 'icon' => string|NULL].
+ *   Empty array when the menu doesn't exist or has no links.
+ */
+function _squ_theme_footer_menu(string $menu_name, bool $with_icons = FALSE): array {
+  $menu_tree = \Drupal::menuTree();
+
+  $parameters = new MenuTreeParameters();
+  $parameters->setMaxDepth(1)->onlyEnabledLinks();
+  $tree = $menu_tree->load($menu_name, $parameters);
+  $tree = $menu_tree->transform($tree, [
+    ['callable' => 'menu.default_tree_manipulators:checkAccess'],
+    ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
+  ]);
+
+  $links = [];
+  foreach ($tree as $element) {
+    if (isset($element->access) && !$element->access->isAllowed()) {
+      continue;
+    }
+    $title = (string) $element->link->getTitle();
+    $item = [
+      'title' => $title,
+      'url' => $element->link->getUrlObject()->toString(),
+      'icon' => NULL,
+    ];
+    if ($with_icons) {
+      $item['icon'] = _squ_theme_footer_icon($title, (string) $element->link->getDescription());
+    }
+    $links[] = $item;
+  }
+  return $links;
+}
+
+/**
+ * Picks an icon name: "icon:xxx" in the description, else guessed from title.
+ */
+function _squ_theme_footer_icon(string $title, string $description): string {
+  $known = ['video', 'globe', 'user', 'support', 'link'];
+  if (preg_match('/icon:\s*([a-z]+)/i', $description, $m) && in_array(strtolower($m[1]), $known, TRUE)) {
+    return strtolower($m[1]);
+  }
+  $guess = [
+    'video' => ['video', 'media', 'tv', 'youtube', 'watch'],
+    'globe' => ['international', 'global', 'world', 'language', 'website'],
+    'user' => ['login', 'log in', 'portal', 'account', 'profile', 'user', 'staff', 'student', 'alumni'],
+    'support' => ['support', 'help', 'contact', 'service'],
+  ];
+  $haystack = mb_strtolower($title);
+  foreach ($guess as $icon => $words) {
+    foreach ($words as $word) {
+      if (str_contains($haystack, $word)) {
+        return $icon;
+      }
+    }
+  }
+  return 'link';
+}

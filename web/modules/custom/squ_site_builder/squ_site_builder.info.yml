@@ -1,0 +1,16 @@
+name: 'SQU Site Builder'
+type: module
+description: 'One-time installer that creates the SQU content architecture: College/Major taxonomy, content types, paragraph types and the main menu tree. After install, everything it created is edited through the normal Drupal admin UI - no further code needed.'
+core_version_requirement: ^11
+package: SQU
+dependencies:
+  - drupal:taxonomy
+  - drupal:node
+  - drupal:field
+  - drupal:menu_link_content
+  - drupal:menu_ui
+  - drupal:image
+  - drupal:link
+  - drupal:datetime
+  - drupal:text
+  - paragraphs:paragraphs

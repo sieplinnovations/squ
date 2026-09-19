@@ -1,0 +1,209 @@
+:root {
+  --squ-dark: #2b3138;
+  --squ-gold: #c9922a;
+  --squ-white: #ffffff;
+}
+
+/* Hide Olivero's own header chrome entirely - squ_theme builds its own
+   header fresh via JS (see menu-overlay.js), relocating the actual block
+   elements out of wherever Olivero's inherited page template put them. */
+.site-header__fixed,
+.site-header__initial {
+  display: none !important;
+}
+
+/* Olivero's Site branding block brings its own blue background/padding,
+   AND a negative margin-inline-start meant to offset it within Olivero's
+   own grid layout - that negative margin causes clipping/overlap once
+   the block is moved into our own flex header, so it's reset here. */
+.squ-header #block-squ-site-branding {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-inline-start: 0 !important;
+  min-width: 0 !important;
+  min-height: auto !important;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.squ-header #block-squ-site-branding a,
+.squ-header #block-squ-site-branding * {
+  color: var(--squ-white) !important;
+}
+.squ-header #block-squ-site-branding img {
+  height: 40px;
+  width: auto;
+  margin-inline-end: 0.5rem;
+}
+
+.squ-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--squ-dark, #2b3138) !important;
+  padding: 0.75rem 2rem;
+  position: relative;
+  z-index: 40;
+}
+
+/* Site branding block (logo + title) */
+.squ-header .block-site-branding {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.squ-header .site-logo img {
+  height: 48px;
+  width: auto;
+}
+.squ-header .site-name {
+  color: var(--squ-white);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+/* Right-hand cluster: search + quick links + hamburger */
+.squ-header__right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+}
+
+/* The core Search form block. Collapsed by default (icon only, no
+   background of its own - just matches the surrounding dark capsule);
+   clicking it expands into a light pill with the input inside. Clicking
+   anywhere outside collapses it back (see menu-overlay.js). */
+.squ-header__search-form {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  box-sizing: border-box;
+  height: 36px;
+  width: 36px;
+  transition: width 0.25s ease, padding 0.25s ease, background-color 0.25s ease;
+}
+.squ-header__search-form.is-open {
+  width: 210px;
+  padding: 0 1rem 0 0.75rem;
+  cursor: default;
+  background: #f1eef7;
+}
+.squ-header__search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--squ-white);
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+.squ-header__search-form.is-open .squ-header__search-icon {
+  color: #555;
+  width: auto;
+  height: auto;
+  margin-inline-end: 0.5rem;
+}
+.squ-header__search-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.squ-header__search-form input[type="search"],
+.squ-header__search-form input[type="text"] {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 36px;
+  height: 36px;
+  color: #333;
+  width: 160px;
+  outline: none;
+  opacity: 0;
+  box-sizing: border-box;
+  transition: opacity 0.15s ease;
+}
+.squ-header__search-form.is-open input[type="search"],
+.squ-header__search-form.is-open input[type="text"] {
+  opacity: 1;
+}
+.squ-header__search-form input[type="submit"] {
+  display: none;
+}
+/* Drupal's search block may wrap the input/button in its own container
+   div(s) - flatten those so they don't add their own height/margin. */
+.squ-header__search-form form,
+.squ-header__search-form .form-item,
+.squ-header__search-form .js-form-item {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.squ-header__quicklinks ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.squ-header__quicklinks a {
+  color: var(--squ-white);
+  text-decoration: none;
+  font-weight: 500;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.squ-header__quicklinks a:hover,
+.squ-header__quicklinks a.is-active {
+  border-color: var(--squ-gold);
+  color: var(--squ-gold);
+}
+
+.squ-hamburger {
+  background: none;
+  border: none;
+  color: var(--squ-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+}
+.squ-hamburger svg {
+  width: 22px;
+  height: 22px;
+}
+
+.squ-hamburger__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 26px;
+}
+.squ-hamburger__bars span {
+  display: block;
+  height: 2px;
+  background: var(--squ-white);
+  border-radius: 1px;
+}
+
+@media (max-width: 768px) {
+  .squ-header {
+    padding: 0.6rem 1rem;
+  }
+  .squ-header__quicklinks {
+    display: none;
+  }
+}

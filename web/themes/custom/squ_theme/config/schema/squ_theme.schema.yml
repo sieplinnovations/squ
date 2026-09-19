@@ -1,0 +1,14 @@
+squ_theme.settings:
+  type: theme_settings
+  label: 'SQU Theme settings'
+  mapping:
+    footer_logo:
+      type: sequence
+      label: 'Footer logo file'
+      sequence:
+        type: integer
+    footer_pattern:
+      type: sequence
+      label: 'Footer pattern file'
+      sequence:
+        type: integer

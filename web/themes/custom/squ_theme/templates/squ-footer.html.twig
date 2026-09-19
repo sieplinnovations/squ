@@ -1,0 +1,69 @@
+{#
+/**
+ * @file
+ * SQU global footer.
+ *
+ * Variables: home_url, logo_url, pattern_url, site_name, icons[] (title,url,image),
+ * quick_title, quick_links[], legal_links[], copyright. All of it is CMS-managed (see squ_theme.theme).
+ */
+#}
+<footer class="squ-footer" role="contentinfo">
+  <div class="squ-footer__pattern" aria-hidden="true"{% if pattern_url %} style="background-image: url('{{ pattern_url }}')"{% endif %}></div>
+
+  <div class="squ-footer__main">
+    <div class="squ-footer__inner">
+
+      <div class="squ-footer__brand">
+        <a class="squ-footer__logo" href="{{ home_url }}" rel="home">
+          <img src="{{ logo_url }}" alt="{{ site_name }}" loading="lazy">
+        </a>
+
+        {% if icons %}
+          <ul class="squ-footer__icons">
+            {% for icon in icons %}
+              <li>
+                <a class="squ-footer__icon" href="{{ icon.url }}" aria-label="{{ icon.title }}" title="{{ icon.title }}">
+                  {% if icon.image %}
+                    <img src="{{ icon.image }}" alt="" loading="lazy">
+                  {% else %}
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+                  {% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      {% if quick_links %}
+      <nav class="squ-footer__quick" aria-labelledby="squ-footer-quick-title">
+        <h2 class="squ-footer__quick-title" id="squ-footer-quick-title">{{ quick_title }}</h2>
+        <ul class="squ-footer__quick-list">
+          {% for link in quick_links %}
+            <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <div class="squ-footer__bar">
+    <div class="squ-footer__bar-inner">
+      <p class="squ-footer__copyright">
+        <svg class="squ-footer__c" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15.8 9.4A4.4 4.4 0 1 0 15.8 14.6"/></svg>
+        <span>{{ copyright }}</span>
+      </p>
+      {% if legal_links %}
+        <nav class="squ-footer__legal" aria-label="{{ 'Legal'|t }}">
+          <ul>
+            {% for link in legal_links %}
+              <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</footer>

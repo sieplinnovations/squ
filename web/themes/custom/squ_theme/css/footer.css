@@ -1,0 +1,237 @@
+/**
+ * SQU global footer - matches the dark footer design (pattern border, crest +
+ * icon buttons on the left, "Quick LINKS" grid on the right, copyright bar).
+ * Markup: templates/squ-footer.html.twig. Uses logical properties, so the
+ * layout mirrors automatically on Arabic (dir="rtl") pages.
+ */
+.squ-footer {
+      padding-top: 1px;  
+  --squ-footer-bg: #201f1f;
+  --squ-footer-bar: #282626;
+  --squ-footer-gold: #cf9f2a;
+  --squ-footer-text: #b1b1b1;
+  --squ-footer-line: #474646;
+  --squ-footer-pad: clamp(1.25rem, 6.7vw, 9rem);
+
+  background: var(--squ-footer-bg);
+  color: var(--squ-footer-text);
+  font-size: 1rem;
+  line-height: 1.4;
+  margin: 0;
+  width: 100%;
+  clear: both;
+}
+.squ-footer *,
+.squ-footer *::before,
+.squ-footer *::after {
+  box-sizing: border-box;
+}
+.squ-footer :where(a) {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.squ-footer :where(ul, li) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Olivero's own (empty / "Powered by Drupal") footer is not used. */
+.site-footer {
+  display: none !important;
+}
+
+/* --- Geometric border ------------------------------------------------- */
+.squ-footer__pattern {
+  height: 24px;
+  margin-top: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='318' height='24' viewBox='0 0 318 24'%3E%3Cpath d='M0,1L22,23M0,23L22,1M22,1H119.5M22,23H119.5M119.5,1L141.5,23M119.5,23L141.5,1M141.5,1H176.5M141.5,23H176.5M176.5,1L198.5,23M176.5,23L198.5,1M198.5,1H296M198.5,23H296M296,1L318,23M296,23L318,1' fill='none' stroke='%23585757' stroke-width='1.2'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: 118px 0;
+  background-size: 318px 24px;
+}
+
+/* --- Main area -------------------------------------------------------- */
+.squ-footer__main {
+  padding: 4.5rem 0 5.3rem;
+}
+.squ-footer__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 3rem;
+  max-width: 1900px;
+  margin-inline: auto;
+  padding-inline: var(--squ-footer-pad);
+}
+
+/* Brand: logo + 4 icon buttons */
+.squ-footer__logo {
+  display: inline-block;
+  margin-inline-start: -6px; /* logo image has a little built-in margin */
+}
+.squ-footer__logo img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.squ-footer__icons {
+  display: flex;
+  gap: 23px;
+  margin-top: 2.75rem;
+}
+.squ-footer__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #8c8b8b;
+  border-radius: 7px;
+  color: var(--squ-footer-gold);
+}
+.squ-footer__icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.squ-footer__icon:hover,
+.squ-footer__icon:focus-visible {
+  border-color: var(--squ-footer-gold);
+  background: rgba(207, 159, 42, 0.12);
+}
+
+/* Quick links */
+.squ-footer__quick {
+  margin-top: 37px;
+  min-height: 193px;
+  padding-inline-start: 58px;
+  border-inline-start: 1px solid var(--squ-footer-line);
+}
+.squ-footer__quick-title {
+  margin: -2px 0 2.5rem;
+  padding-inline-start: 4px;
+  color: var(--squ-footer-gold);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.squ-footer__quick-list {
+  display: grid;
+  grid-template-columns: 131px 140px auto;
+  column-gap: 0;
+  row-gap: 23px;
+}
+.squ-footer__quick-list a {
+  display: inline-block;
+  font-size: 1.0625rem;
+  line-height: 24px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.squ-footer__quick-list a:hover,
+.squ-footer__quick-list a:focus-visible {
+  color: var(--squ-footer-gold);
+}
+
+/* --- Bottom bar ------------------------------------------------------- */
+.squ-footer__bar {
+  background: var(--squ-footer-bar);
+  min-height: 77px;
+  display: flex;
+  align-items: center;
+}
+.squ-footer__bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  width: 100%;
+  padding-inline: clamp(1.25rem, 4.3vw, 5.5rem);
+  font-size: 0.875rem;
+  color: #cacaca;
+}
+.squ-footer__copyright {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+.squ-footer__c {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.squ-footer__legal {
+  position: relative;
+  top: -8px; /* the design sits this line slightly above the copyright line */
+  margin-inline-end: 2.5rem;
+}
+.squ-footer__legal ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.squ-footer__legal li + li::before {
+  content: "|";
+  margin-inline: 0.7rem;
+  color: #cacaca;
+}
+.squ-footer__legal a:hover,
+.squ-footer__legal a:focus-visible {
+  color: var(--squ-footer-gold);
+}
+
+/* --- Tablet / mobile -------------------------------------------------- */
+@media (max-width: 900px) {
+  .squ-footer__main {
+    padding: 3rem 0 3.5rem;
+  }
+  .squ-footer__inner {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  .squ-footer__quick {
+    margin-top: 0;
+    min-height: 0;
+    width: 100%;
+    padding-inline-start: 0;
+    padding-top: 2rem;
+    border-inline-start: 0;
+    border-top: 1px solid var(--squ-footer-line);
+  }
+  .squ-footer__quick-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 1rem;
+  }
+  .squ-footer__quick-list a {
+    white-space: normal;
+  }
+  .squ-footer__quick-title {
+    padding-inline-start: 0;
+  }
+  .squ-footer__bar-inner {
+    padding-block: 1.25rem;
+  }
+  .squ-footer__legal {
+    top: 0;
+    margin-inline-end: 0;
+  }
+  .squ-footer__legal ul {
+    gap: 0.4rem 1.25rem;
+  }
+  .squ-footer__legal li + li::before {
+    display: none;
+  }
+}
+

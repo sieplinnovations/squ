@@ -1,0 +1,79 @@
+.squ-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  background: rgba(20, 22, 26, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.squ-menu-overlay.is-open {
+  display: block;
+}
+
+.squ-menu-overlay__close {
+  position: absolute;
+  top: 1.75rem;
+  right: 2rem;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* All three levels show side by side, at once, as soon as the overlay
+   opens - not a single sliding panel. Clicking an item that has children
+   updates the NEXT column's content; it does not hide the current one. */
+.squ-menu-overlay__panels {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 4rem;
+  padding: 7rem 3rem 3rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.squ-menu-panel {
+  flex: 0 0 auto;
+  min-width: 200px;
+}
+
+.squ-menu-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.squ-menu-panel li {
+  margin-bottom: 1.5rem;
+}
+.squ-menu-panel a {
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.squ-menu-panel a:hover,
+.squ-menu-panel a.is-selected {
+  border-color: #c9922a;
+  color: #c9922a;
+}
+
+@media (max-width: 900px) {
+  .squ-menu-overlay__panels {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 6rem 1.5rem 2rem;
+  }
+  .squ-menu-panel a {
+    font-size: 1.3rem;
+  }
+}

@@ -1,0 +1,9 @@
+<section class="squ-hero"{% if content.field_background_image %} data-has-bg="1"{% endif %}>
+  <div class="squ-hero__bg">{{ content.field_background_image }}</div>
+  <div class="squ-hero__card">
+    <span class="squ-hero__eyebrow">{{ content.field_eyebrow }}</span>
+    <h1 class="squ-hero__title">{{ content.field_title }}</h1>
+    <div class="squ-hero__quote">{{ content.field_quote }}</div>
+    <div class="squ-hero__attribution">{{ content.field_quote_attribution }}</div>
+  </div>
+</section>

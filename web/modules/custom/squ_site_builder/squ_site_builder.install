@@ -1,0 +1,332 @@
+<?php
+
+/**
+ * @file
+ * Builds the SQU content architecture on module install:
+ * taxonomy (College/Major), content types + fields, paragraph types + fields,
+ * and the 3-level main menu tree. Everything created here becomes a normal,
+ * admin-UI-editable part of the site - run this once.
+ */
+
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\node\Entity\NodeType;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\paragraphs\Entity\ParagraphsType;
+use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\system\Entity\Menu;
+
+/**
+ * Implements hook_install().
+ */
+function squ_site_builder_install() {
+  _squ_create_taxonomy();
+  _squ_create_paragraph_types();
+  _squ_create_content_types();
+  _squ_create_menus();
+  \Drupal::messenger()->addStatus(t('SQU site structure created: taxonomy, content types, paragraphs and menus. See the module README for what to do next.'));
+}
+
+/**
+ * College + Major taxonomy, with Major referencing its parent College.
+ */
+function _squ_create_taxonomy() {
+  if (!Vocabulary::load('college')) {
+    Vocabulary::create(['vid' => 'college', 'name' => 'College'])->save();
+  }
+  if (!Vocabulary::load('major')) {
+    Vocabulary::create(['vid' => 'major', 'name' => 'Major'])->save();
+  }
+
+  _squ_add_field('taxonomy_term', 'major', 'field_college', 'College', 'entity_reference', 1, [
+    'target_type' => 'taxonomy_term',
+  ], [
+    'handler' => 'default:taxonomy_term',
+    'handler_settings' => ['target_bundles' => ['college' => 'college']],
+  ], TRUE);
+
+  // Seed a few real terms so the site isn't empty on first login.
+  $colleges = [
+    'College of Engineering',
+    'College of Science',
+    'College of Medicine & Health Sciences',
+    'College of Arts & Social Sciences',
+  ];
+  $college_ids = [];
+  foreach ($colleges as $name) {
+    $existing = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties(['vid' => 'college', 'name' => $name]);
+    if (!$existing) {
+      $term = Term::create(['vid' => 'college', 'name' => $name]);
+      $term->save();
+      $college_ids[$name] = $term->id();
+    }
+    else {
+      $college_ids[$name] = reset($existing)->id();
+    }
+  }
+
+  $majors = [
+    'Civil Engineering' => 'College of Engineering',
+    'Mechanical Engineering' => 'College of Engineering',
+    'Electrical & Computer Engineering' => 'College of Engineering',
+    'Physics' => 'College of Science',
+    'Chemistry' => 'College of Science',
+    'Medicine' => 'College of Medicine & Health Sciences',
+  ];
+  foreach ($majors as $name => $college_name) {
+    $existing = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties(['vid' => 'major', 'name' => $name]);
+    if (!$existing) {
+      Term::create([
+        'vid' => 'major',
+        'name' => $name,
+        'field_college' => ['target_id' => $college_ids[$college_name]],
+      ])->save();
+    }
+  }
+}
+
+/**
+ * Paragraph types that make the homepage drag-and-drop editable.
+ */
+function _squ_create_paragraph_types() {
+  $types = [
+    'hero_banner' => 'Hero Banner',
+    'feature_tile' => 'Feature Tile',
+    'feature_tile_group' => 'Feature Tile Group',
+    'stat_counter' => 'Stat Counter',
+    'stat_counter_group' => 'Stat Counter Group',
+    'research_card' => 'Research Card',
+    'research_highlight' => 'Research Highlight',
+    'we_are_squ_block' => 'We Are SQU Block',
+    'gallery_tile' => 'Gallery Tile',
+    'student_life_gallery' => 'Student Life Gallery',
+    'news_teaser_block' => 'News Teaser Block',
+  ];
+  foreach ($types as $id => $label) {
+    if (!ParagraphsType::load($id)) {
+      ParagraphsType::create(['id' => $id, 'label' => $label])->save();
+    }
+  }
+
+  _squ_add_field('paragraph', 'hero_banner', 'field_background_image', 'Background Image', 'image');
+  _squ_add_field('paragraph', 'hero_banner', 'field_eyebrow', 'Eyebrow Text', 'string');
+  _squ_add_field('paragraph', 'hero_banner', 'field_title', 'Title', 'string');
+  _squ_add_field('paragraph', 'hero_banner', 'field_quote', 'Quote', 'text_long');
+  _squ_add_field('paragraph', 'hero_banner', 'field_quote_attribution', 'Quote Attribution', 'string');
+
+  _squ_add_field('paragraph', 'feature_tile', 'field_image', 'Image', 'image');
+  _squ_add_field('paragraph', 'feature_tile', 'field_label', 'Label', 'string');
+  _squ_add_field('paragraph', 'feature_tile', 'field_link', 'Link', 'link');
+  _squ_add_paragraph_ref('paragraph', 'feature_tile_group', 'field_tiles', 'Tiles', ['feature_tile']);
+
+  _squ_add_field('paragraph', 'stat_counter', 'field_number', 'Number', 'string');
+  _squ_add_field('paragraph', 'stat_counter', 'field_label', 'Label', 'string');
+  _squ_add_paragraph_ref('paragraph', 'stat_counter_group', 'field_stats', 'Stats', ['stat_counter']);
+
+  _squ_add_field('paragraph', 'research_card', 'field_image', 'Image', 'image');
+  _squ_add_field('paragraph', 'research_card', 'field_title', 'Title', 'string');
+  _squ_add_field('paragraph', 'research_card', 'field_body', 'Body', 'text_long');
+  _squ_add_field('paragraph', 'research_card', 'field_link', 'Link', 'link');
+  _squ_add_field('paragraph', 'research_highlight', 'field_heading', 'Heading', 'string');
+  _squ_add_field('paragraph', 'research_highlight', 'field_body', 'Body', 'text_long');
+  _squ_add_paragraph_ref('paragraph', 'research_highlight', 'field_cards', 'Cards', ['research_card']);
+
+  _squ_add_field('paragraph', 'we_are_squ_block', 'field_background_image', 'Background Image', 'image');
+  _squ_add_field('paragraph', 'we_are_squ_block', 'field_heading', 'Heading', 'string');
+  _squ_add_field('paragraph', 'we_are_squ_block', 'field_body', 'Body', 'text_long');
+  _squ_add_field('paragraph', 'we_are_squ_block', 'field_button_1', 'Button 1', 'link');
+  _squ_add_field('paragraph', 'we_are_squ_block', 'field_button_2', 'Button 2', 'link');
+
+  _squ_add_field('paragraph', 'gallery_tile', 'field_image', 'Image', 'image');
+  _squ_add_field('paragraph', 'gallery_tile', 'field_label', 'Label', 'string');
+  _squ_add_field('paragraph', 'student_life_gallery', 'field_heading', 'Heading', 'string');
+  _squ_add_paragraph_ref('paragraph', 'student_life_gallery', 'field_tiles', 'Tiles', ['gallery_tile']);
+
+  _squ_add_field('paragraph', 'news_teaser_block', 'field_heading', 'Heading', 'string');
+}
+
+/**
+ * Content types: Program Page, News Article, Landing Page.
+ */
+function _squ_create_content_types() {
+  $types = [
+    'program_page' => 'Program Page',
+    'news_article' => 'News Article',
+    'landing_page' => 'Landing Page',
+  ];
+  foreach ($types as $id => $label) {
+    if (!NodeType::load($id)) {
+      NodeType::create(['type' => $id, 'name' => $label])->save();
+    }
+  }
+
+  _squ_add_field('node', 'program_page', 'field_image', 'Featured Image', 'image');
+  _squ_add_field('node', 'program_page', 'field_college', 'College', 'entity_reference', 1, [
+    'target_type' => 'taxonomy_term',
+  ], [
+    'handler' => 'default:taxonomy_term',
+    'handler_settings' => ['target_bundles' => ['college' => 'college']],
+  ], TRUE);
+  _squ_add_field('node', 'program_page', 'field_major', 'Major', 'entity_reference', 1, [
+    'target_type' => 'taxonomy_term',
+  ], [
+    'handler' => 'default:taxonomy_term',
+    'handler_settings' => ['target_bundles' => ['major' => 'major']],
+  ], TRUE);
+
+  _squ_add_field('node', 'news_article', 'field_image', 'Image', 'image');
+  _squ_add_field('node', 'news_article', 'field_date', 'Date', 'datetime');
+  _squ_add_field('node', 'news_article', 'field_teaser', 'Teaser', 'text_long');
+
+  _squ_add_paragraph_ref('node', 'landing_page', 'field_sections', 'Page Sections', [
+    'hero_banner',
+    'feature_tile_group',
+    'stat_counter_group',
+    'research_highlight',
+    'we_are_squ_block',
+    'news_teaser_block',
+    'student_life_gallery',
+  ]);
+}
+
+/**
+ * Main navigation (3 levels) + the always-visible header quick-links menu.
+ *
+ * NOTE: menu links point to placeholder paths (e.g. /study, /research).
+ * Create matching Basic Page nodes with those URL aliases (or edit the
+ * links in Structure > Menus > Main navigation) so they resolve instead
+ * of 404ing.
+ */
+function _squ_create_menus() {
+  if (!Menu::load('header-quick-links')) {
+    Menu::create(['id' => 'header-quick-links', 'label' => 'Header Quick Links'])->save();
+  }
+
+  if (_squ_menu_link_exists('main', 'Study')) {
+    return;
+  }
+
+  $study = MenuLinkContent::create([
+    'title' => 'Study',
+    'link' => ['uri' => 'internal:/study'],
+    'menu_name' => 'main',
+    'weight' => 0,
+  ]);
+  $study->save();
+
+  $post_grad = MenuLinkContent::create([
+    'title' => 'Post Graduate',
+    'link' => ['uri' => 'internal:/study/post-graduate'],
+    'menu_name' => 'main',
+    'parent' => 'menu_link_content:' . $study->uuid(),
+    'weight' => 0,
+  ]);
+  $post_grad->save();
+
+  $under_grad = MenuLinkContent::create([
+    'title' => 'Under Graduate',
+    'link' => ['uri' => 'internal:/study/under-graduate'],
+    'menu_name' => 'main',
+    'parent' => 'menu_link_content:' . $study->uuid(),
+    'weight' => 1,
+  ]);
+  $under_grad->save();
+
+  MenuLinkContent::create([
+    'title' => 'Transfer to SQU',
+    'link' => ['uri' => 'internal:/study/transfer'],
+    'menu_name' => 'main',
+    'parent' => 'menu_link_content:' . $study->uuid(),
+    'weight' => 2,
+  ])->save();
+
+  $level3 = [
+    'Home' => '/under-graduate/home',
+    'About Us' => '/under-graduate/about-us',
+    'Programs' => '/programs',
+    'Students' => '/under-graduate/students',
+  ];
+  $weight = 0;
+  foreach ($level3 as $title => $path) {
+    MenuLinkContent::create([
+      'title' => $title,
+      'link' => ['uri' => 'internal:' . $path],
+      'menu_name' => 'main',
+      'parent' => 'menu_link_content:' . $under_grad->uuid(),
+      'weight' => $weight++,
+    ])->save();
+  }
+
+  MenuLinkContent::create(['title' => 'Research', 'link' => ['uri' => 'internal:/research'], 'menu_name' => 'main', 'weight' => 1])->save();
+  MenuLinkContent::create(['title' => 'News & Events', 'link' => ['uri' => 'internal:/news'], 'menu_name' => 'main', 'weight' => 2])->save();
+  MenuLinkContent::create(['title' => 'Staff', 'link' => ['uri' => 'internal:/staff'], 'menu_name' => 'main', 'weight' => 3])->save();
+  MenuLinkContent::create(['title' => 'Open Data', 'link' => ['uri' => 'internal:/open-data'], 'menu_name' => 'main', 'weight' => 4])->save();
+  MenuLinkContent::create(['title' => 'Student Life', 'link' => ['uri' => 'internal:/student-life'], 'menu_name' => 'main', 'weight' => 5])->save();
+
+  MenuLinkContent::create(['title' => 'Study', 'link' => ['uri' => 'internal:/study'], 'menu_name' => 'header-quick-links', 'weight' => 0])->save();
+  MenuLinkContent::create(['title' => 'Research', 'link' => ['uri' => 'internal:/research'], 'menu_name' => 'header-quick-links', 'weight' => 1])->save();
+  MenuLinkContent::create(['title' => 'News', 'link' => ['uri' => 'internal:/news'], 'menu_name' => 'header-quick-links', 'weight' => 2])->save();
+}
+
+function _squ_menu_link_exists($menu_name, $title) {
+  $existing = \Drupal::entityTypeManager()->getStorage('menu_link_content')
+    ->loadByProperties(['menu_name' => $menu_name, 'title' => $title]);
+  return !empty($existing);
+}
+
+/**
+ * Generic helper: create a field storage + field instance if missing.
+ */
+function _squ_add_field($entity_type, $bundle, $field_name, $label, $type, $cardinality = 1, array $storage_settings = [], array $field_settings = [], $required = FALSE) {
+  if (!FieldStorageConfig::loadByName($entity_type, $field_name)) {
+    FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'type' => $type,
+      'cardinality' => $cardinality,
+      'settings' => $storage_settings,
+    ])->save();
+  }
+  if (!FieldConfig::loadByName($entity_type, $bundle, $field_name)) {
+    FieldConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $entity_type,
+      'bundle' => $bundle,
+      'label' => $label,
+      'required' => $required,
+      'settings' => $field_settings,
+    ])->save();
+  }
+}
+
+/**
+ * Helper: an unlimited-cardinality paragraph-reference field restricted
+ * to a given set of paragraph bundles (how sections/groups are built).
+ */
+function _squ_add_paragraph_ref($host_entity_type, $bundle, $field_name, $label, array $allowed_bundles) {
+  if (!FieldStorageConfig::loadByName($host_entity_type, $field_name)) {
+    FieldStorageConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $host_entity_type,
+      'type' => 'entity_reference_revisions',
+      'cardinality' => -1,
+      'settings' => ['target_type' => 'paragraph'],
+    ])->save();
+  }
+  if (!FieldConfig::loadByName($host_entity_type, $bundle, $field_name)) {
+    $target_bundles = array_combine($allowed_bundles, $allowed_bundles);
+    FieldConfig::create([
+      'field_name' => $field_name,
+      'entity_type' => $host_entity_type,
+      'bundle' => $bundle,
+      'label' => $label,
+      'settings' => [
+        'handler' => 'default:paragraph',
+        'handler_settings' => ['target_bundles' => $target_bundles],
+      ],
+    ])->save();
+  }
+}
